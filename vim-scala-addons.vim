@@ -24,6 +24,15 @@ let s:expansions = {
   \'@tailrec': 'scala.annotation.tailrec'
   \}
 
+
+"Adds a Scala import based on the idea that most of the time I
+"only really use the same couple dozen classes, so this is way faster
+"than having Ensime look it up.
+"
+"The added benefit is that it can do matching that a more intelligent
+"import tool can't do like ? -> akka.pattern.ask
+"
+"Based in part on http://vim.wikia.com/wiki/Add_Java_import_statements_automatically
 command! AddFastImport call s:AddFastImport()
 
 function! s:AddFastImport() 
