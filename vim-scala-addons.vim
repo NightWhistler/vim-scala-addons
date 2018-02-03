@@ -30,12 +30,15 @@ function! s:AddFastImport( word )
 
     let full_import = s:expansions[a:word]
     echom "Adding import for " . full_import
- " insert after last import or in line 3 (assuming 1 contains package)
-    if search('^\s*import\s', 'b') == 0
-      3
+ " insert after last import, after package or on first line
+    if search('^\s*import\s', 'b') > 0 
+      execute "normal! jIimport " . full_import . "\<cr>\<esc>"
+    elseif search('^\s*package\s', 'b') > 0 
+      execute "normal! joimport " . full_import . "\<cr>\<esc>"
+    else 
+      1
+      execute "normal! Oimport " . full_import . "\<cr>\<esc>"
     endif
-
-    execute "normal! Oimport " . full_import . "\<cr>\<esc>"
   else
     echom "Unknown class '" . a:word . "' can't add import."
   endif
