@@ -8,4 +8,4 @@ I've shared them here since they may serve as inspiration.
 
 ## Prerequisites
 
-These assume you have Derek Wyatt's excellent vim-scala[https://github.com/derekwyatt/vim-scala] plugin installed.
+These assume you have Derek Wyatt's excellent [vim-scala]( https://github.com/derekwyatt/vim-scala ) plugin installed.
