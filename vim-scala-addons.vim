@@ -4,7 +4,7 @@ let s:expansions = {
   \'Try': 'scala.util.Try', 
   \'Success': 'scala.util.Success', 
   \'Failure': 'scala.util.Failure' ,
-  \'Timeout': 'scala.util.Timeout',
+  \'Timeout': 'akka.util.Timeout',
   \'Actor': 'akka.actor.Actor',
   \'ActorSystem': 'akka.actor.ActorSystem',
   \'ActorRef': 'akka.actor.ActorRef',
@@ -16,19 +16,28 @@ let s:expansions = {
   \'LoggerFactory': 'org.slf4j.LoggerFactory',
   \'Future': 'scala.concurrent.Future',
   \'ExecutionContext': 'scala.concurrent.ExecutionContext',
-  \'Duration': 'scala.concurrent.Duration',
+  \'seconds': "scala.concurrent.duration._",
+  \'minutes': 'scala.concurrent.duration._',
+  \'millis': 'scala.concurrent.duration._',
   \'JavaConverters': 'scala.collection.JavaConverters',
   \'UUID': 'java.util.UUID',
   \'@tailrec': 'scala.annotation.tailrec'
   \}
 
-command! AddFastImport call s:AddFastImport(expand("<cword>"))
+command! AddFastImport call s:AddFastImport()
 
-function! s:AddFastImport( word ) 
+function! s:AddFastImport() 
 
-  if has_key(s:expansions, a:word) 
+  execute "normal! mi"
+  if has_key(s:expansions, expand("<cword>")) 
+    let full_import = s:expansions[expand("<cword>")]
+  elseif has_key(s:expansions, expand("<cWORD>"))
+    let full_import = s:expansions[expand("<cWORD>")]
+  else
+    let full_import = ""
+  endif
 
-    let full_import = s:expansions[a:word]
+  if strlen( full_import ) > 0  
     echom "Adding import for " . full_import
  " insert after last import, after package or on first line
     if search('^\s*import\s', 'b') > 0 
@@ -40,8 +49,10 @@ function! s:AddFastImport( word )
       execute "normal! Oimport " . full_import . "\<cr>\<esc>"
     endif
   else
-    echom "Unknown class '" . a:word . "' can't add import."
+    echom "Unknown class '" . expand("<cword>") . "' can't add import."
   endif
+
+  execute "normal! `i"
 
 endfunction
 
