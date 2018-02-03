@@ -1,5 +1,4 @@
-
-"A quick list of common classes I import, so I don't
+" A quick list of common classes I import, so I don't
 "need to use Ensime's slow lookup for them.
 let s:expansions = { 'Try': 'scala.util.Try', 
   \'Success': 'scala.util.Success', 
@@ -27,8 +26,8 @@ function! s:AddFastImport( word )
 endfunction
 
 "Simple template for an empty Scala class with proper package
-command EmptyScalaClass :call EmptyScalaClass()
-function! EmptyScalaClass()
+command EmptyScalaClass :call s:EmptyScalaClass()
+function! s:EmptyScalaClass()
   let filename = expand("%")
   let filename = substitute(filename, "\.scala$", "", "")
   let dir = getcwd() . "/" . filename
@@ -51,8 +50,9 @@ endfunction
 "
 "This allows you to have SBT running a continuous compile loop (~compile)
 "and to quickly load the errors into VIM and jump to the first error.
-command LoadSBTErrors :call LoadSBTErrors()
-function! LoadSBTErrors()
+command LoadSBTErrors :call s:LoadSBTErrors()
+function! s:LoadSBTErrors()
+  compiler sbt
   "Since SBT only compiles tests when the main code compiles, load tests first
   if filereadable("target/streams/test/compileIncremental/\$global/streams/out")
     cfile target/streams/test/compileIncremental/\$global/streams/out
@@ -61,7 +61,6 @@ function! LoadSBTErrors()
   else 
     cfile target/streams/compile/compileIncremental/\$global/streams/out
   endif
-
 endfunction
 
 
