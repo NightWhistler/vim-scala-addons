@@ -1,8 +1,22 @@
 " A quick list of common classes I import, so I don't
 "need to use Ensime's slow lookup for them.
-let s:expansions = { 'Try': 'scala.util.Try', 
+let s:expansions = { 
+  \'Try': 'scala.util.Try', 
   \'Success': 'scala.util.Success', 
-  \'Failure': 'scala.util.Failure' 
+  \'Failure': 'scala.util.Failure' ,
+  \'Timeout', 'scala.util.Timeout'
+  \'Actor': 'akka.actor.Actor',
+  \'ActorRef': 'akka.actor.ActorRef',
+  \'Props': 'akka.actor.Props',
+  \'pipeTo': 'akka.pattern.pipe',
+  \'?': 'akka.pattern.ask',
+  \'Logger': 'com.typesafe.scalalogging.Logger',
+  \'Future': 'scala.concurrent.Future',
+  \'ExecutionContext': 'scala.concurrent.ExecutionContext',
+  \'Duration': 'scala.concurrent.Duration',
+  \'JavaConverters', 'scala.collection.JavaConverters',
+  \'UUID', 'java.util.UUID',
+  \'@tailrec', 'scala.annotation.tailrec'
   \}
 
 command! AddFastImport call s:AddFastImport(expand("<cword>"))
