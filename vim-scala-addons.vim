@@ -4,19 +4,22 @@ let s:expansions = {
   \'Try': 'scala.util.Try', 
   \'Success': 'scala.util.Success', 
   \'Failure': 'scala.util.Failure' ,
-  \'Timeout', 'scala.util.Timeout'
+  \'Timeout': 'scala.util.Timeout',
   \'Actor': 'akka.actor.Actor',
+  \'ActorSystem': 'akka.actor.ActorSystem',
   \'ActorRef': 'akka.actor.ActorRef',
   \'Props': 'akka.actor.Props',
   \'pipeTo': 'akka.pattern.pipe',
   \'?': 'akka.pattern.ask',
+  \'ConfigFactory': 'com.typesage.config.ConfigFactory',
   \'Logger': 'com.typesafe.scalalogging.Logger',
+  \'LoggerFactory': 'org.slf4j.LoggerFactory',
   \'Future': 'scala.concurrent.Future',
   \'ExecutionContext': 'scala.concurrent.ExecutionContext',
   \'Duration': 'scala.concurrent.Duration',
-  \'JavaConverters', 'scala.collection.JavaConverters',
-  \'UUID', 'java.util.UUID',
-  \'@tailrec', 'scala.annotation.tailrec'
+  \'JavaConverters': 'scala.collection.JavaConverters',
+  \'UUID': 'java.util.UUID',
+  \'@tailrec': 'scala.annotation.tailrec'
   \}
 
 command! AddFastImport call s:AddFastImport(expand("<cword>"))
@@ -27,14 +30,14 @@ function! s:AddFastImport( word )
 
     let full_import = s:expansions[a:word]
     echom "Adding import for " . full_import
- " insert after last import or in first line
+ " insert after last import or in line 3 (assuming 1 contains package)
     if search('^\s*import\s', 'b') == 0
-      1
+      3
     endif
 
-    execute "normal! Iimport " . full_import . "\<cr>\<esc>"
+    execute "normal! Oimport " . full_import . "\<cr>\<esc>"
   else
-    echom "Unknown class, can't add import."
+    echom "Unknown class '" . a:word . "' can't add import."
   endif
 
 endfunction
