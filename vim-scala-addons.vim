@@ -1,6 +1,6 @@
 " A quick list of common classes I import, so I don't
 "need to use Ensime's slow lookup for them.
-let s:expansions = { 
+let s:expansions = {
   \'Try': 'scala.util.Try', 
   \'Success': 'scala.util.Success', 
   \'Failure': 'scala.util.Failure' ,
@@ -11,10 +11,16 @@ let s:expansions = {
   \'Props': 'akka.actor.Props',
   \'pipeTo': 'akka.pattern.pipe',
   \'?': 'akka.pattern.ask',
-  \'ConfigFactory': 'com.typesage.config.ConfigFactory',
+  \'TestKit': 'akka.testkit.TestKit',
+  \'ImplicitSender': 'akka.testkit.ImplicitSender',
+  \'TestProbe': 'akka.testkit.TestProbe',
+  \'ConfigFactory': 'com.typesafe.config.ConfigFactory',
+  \'Config': 'com.typesafe.config.Config',
   \'Logger': 'com.typesafe.scalalogging.Logger',
   \'LoggerFactory': 'org.slf4j.LoggerFactory',
   \'Future': 'scala.concurrent.Future',
+  \'WordSpec': 'org.scalatest.WordSpec',
+  \'WordSpecLike': 'org.scalatest.WordSpecLike',
   \'ExecutionContext': 'scala.concurrent.ExecutionContext',
   \'seconds': "scala.concurrent.duration._",
   \'minutes': 'scala.concurrent.duration._',
@@ -23,7 +29,6 @@ let s:expansions = {
   \'UUID': 'java.util.UUID',
   \'@tailrec': 'scala.annotation.tailrec'
   \}
-
 
 "Adds a Scala import based on the idea that most of the time I
 "only really use the same couple dozen classes, so this is way faster
@@ -93,14 +98,32 @@ endfunction
 command LoadSBTErrors :call s:LoadSBTErrors()
 function! s:LoadSBTErrors()
   compiler sbt
-  "Since SBT only compiles tests when the main code compiles, load tests first
-  if filereadable("target/streams/test/compileIncremental/\$global/streams/out")
-    cfile target/streams/test/compileIncremental/\$global/streams/out
-    caddfile target/streams/compile/compileIncremental/\$global/streams/out
+
+  "Clear the Quickfix list
+  cexpr [] 
+  let foundItem = 0
+
+  "Find all files named 'out'
+  let outFiles = systemlist("find . -name out")
+
+  for item in outFiles
+    "Filter on items with compileIncremental
+    if item =~# 'compileIncremental'
+      let foundItem = 1
+      "Escape the $ in $global
+      let fileName = substitute( item, "\\$", "\\\\$", "")
+      execute "caddfile " . fileName
+    endif
+  endfor
+
+  if foundItem
     cc
-  else 
-    cfile target/streams/compile/compileIncremental/\$global/streams/out
+  else
+    "This will hardly ever happen since I can't actually detect yet if the
+    "files contained errors.
+    echo "Found no errors... yay!"
   endif
+
 endfunction
 
 
