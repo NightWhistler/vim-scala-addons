@@ -6,6 +6,7 @@ let s:expansions = {
   \'Failure': 'scala.util.Failure' ,
   \'Timeout': 'akka.util.Timeout',
   \'Actor': 'akka.actor.Actor',
+  \'ActorLogging': 'akka.actor.ActorLogging',
   \'ActorSystem': 'akka.actor.ActorSystem',
   \'ActorRef': 'akka.actor.ActorRef',
   \'Props': 'akka.actor.Props',
@@ -21,6 +22,7 @@ let s:expansions = {
   \'Future': 'scala.concurrent.Future',
   \'WordSpec': 'org.scalatest.WordSpec',
   \'WordSpecLike': 'org.scalatest.WordSpecLike',
+  \'Matchers': 'org.scalatest.Matchers',
   \'ExecutionContext': 'scala.concurrent.ExecutionContext',
   \'seconds': "scala.concurrent.duration._",
   \'minutes': 'scala.concurrent.duration._',
@@ -97,7 +99,13 @@ endfunction
 "and to quickly load the errors into VIM and jump to the first error.
 command LoadSBTErrors :call s:LoadSBTErrors()
 function! s:LoadSBTErrors()
-  compiler sbt
+  " compiler sbt
+  "
+  " SBT 1.0 Changed the errorformat, so the one in vim-scala no longer works.
+  " We really need a nice dynamic way to switch.
+  set errorformat=%E\ %#[error]\ %f:%l:%c:\ %m,%C\ %#[error]\ %p^,%-C%.%#,%Z,
+      \%W\ %#[warn]\ %f:%l:%c:\ %m,%C\ %#[warn]\ %p^,%-C%.%#,%Z,
+      \%-G%.%#
 
   "Clear the Quickfix list
   cexpr [] 
@@ -108,7 +116,7 @@ function! s:LoadSBTErrors()
 
   for item in outFiles
     "Filter on items with compileIncremental
-    if item =~# 'compileIncremental'
+    if item =~# 'compile' || item =~# 'scalastyle'
       let foundItem = 1
       "Escape the $ in $global
       let fileName = substitute( item, "\\$", "\\\\$", "")
