@@ -1,8 +1,8 @@
 " A quick list of common classes I import, so I don't
 "need to use Ensime's slow lookup for them.
 let s:expansions = {
-  \'Try': 'scala.util.Try', 
-  \'Success': 'scala.util.Success', 
+  \'Try': 'scala.util.Try',
+  \'Success': 'scala.util.Success',
   \'Failure': 'scala.util.Failure' ,
   \'Timeout': 'akka.util.Timeout',
   \'Actor': 'akka.actor.Actor',
@@ -42,10 +42,10 @@ let s:expansions = {
 "Based in part on http://vim.wikia.com/wiki/Add_Java_import_statements_automatically
 command! AddFastImport call s:AddFastImport()
 
-function! s:AddFastImport() 
+function! s:AddFastImport()
 
   execute "normal! mi"
-  if has_key(s:expansions, expand("<cword>")) 
+  if has_key(s:expansions, expand("<cword>"))
     let full_import = s:expansions[expand("<cword>")]
   elseif has_key(s:expansions, expand("<cWORD>"))
     let full_import = s:expansions[expand("<cWORD>")]
@@ -53,14 +53,14 @@ function! s:AddFastImport()
     let full_import = ""
   endif
 
-  if strlen( full_import ) > 0  
+  if strlen( full_import ) > 0
     echom "Adding import for " . full_import
  " insert after last import, after package or on first line
-    if search('^\s*import\s', 'b') > 0 
+    if search('^\s*import\s', 'b') > 0
       execute "normal! jIimport " . full_import . "\<cr>\<esc>"
-    elseif search('^\s*package\s', 'b') > 0 
+    elseif search('^\s*package\s', 'b') > 0
       execute "normal! joimport " . full_import . "\<cr>\<esc>"
-    else 
+    else
       1
       execute "normal! Oimport " . full_import . "\<cr>\<esc>"
     endif
@@ -82,7 +82,7 @@ function! s:EmptyScalaClass()
   let dir = substitute(dir, "\/[^\/]*$", "", "")
   let dir = substitute(dir, "\/", ".", "g")
   let filename = substitute(filename, "^.*\/", "", "")
-  let dir = "package " . dir 
+  let dir = "package " . dir
   let result = append(0, dir)
   let result = append(1, "")
   let result = append(2, "class " . filename . " {")
@@ -108,7 +108,7 @@ function! s:LoadSBTErrors()
       \%-G%.%#
 
   "Clear the Quickfix list
-  cexpr [] 
+  cexpr []
   let foundItem = 0
 
   "Find all files named 'out'
@@ -134,5 +134,37 @@ function! s:LoadSBTErrors()
 
 endfunction
 
+command LoadCtags :call s:LoadCtags()
+function! s:LoadCtags()
+  let tagFiles = systemlist("find $PWD -name .tags")
+  set tags=""
+  for item in tagFiles
+    execute "set tags+=" . item
+  endfor
+endfunction
+
+command! -nargs=1 Function call s:Function(<f-args>)
+function! s:Function(name)
+  " Retrieve tags of the 'f' kind
+  let tags = taglist('^'.a:name)
+  let tags = filter(tags, 'v:val["kind"] == "f"')
+
+  " Prepare them for inserting in the quickfix window
+  let qf_taglist = []
+  for entry in tags
+    call add(qf_taglist, {
+          \ 'pattern':  entry['cmd'],
+          \ 'filename': entry['filename'],
+          \ })
+  endfor
+
+  " Place the tags in the quickfix window, if possible
+  if len(qf_taglist) > 0
+    call setqflist(qf_taglist)
+    copen
+  else
+    echo "No tags found for ".a:name
+  endif
+endfunction
 
 
