@@ -50,7 +50,12 @@ function! s:AddFastImport()
   elseif has_key(s:expansions, expand("<cWORD>"))
     let full_import = s:expansions[expand("<cWORD>")]
   else
-    let full_import = ""
+    let packages = s:FindPackage(expand("<cword>"))
+    if len(packages) == 1
+      let full_import = packages[0]
+    else 
+      let full_import = ""
+    endif
   endif
 
   if strlen( full_import ) > 0
@@ -141,6 +146,50 @@ function! s:LoadCtags()
   for item in tagFiles
     execute "set tags+=" . item
   endfor
+endfunction
+
+command ShowPackages :call s:ShowPackages(expand("<cword>"))
+function! s:ShowPackages(word)
+  let matching = s:FindPackage(a:word)
+  for item in matching
+    echo "Match: " . item
+  endfor
+
+endfunction
+
+command FindPackage :call s:FindPackage(expand("<cword>"))
+function! s:FindPackage(word)
+
+  let word = a:word
+  let tags = taglist('^' . word)
+  let tags = filter(tags, 'v:val["kind"] == "c"')
+
+  let mapped = map(tags, 's:FileNameToPackage(v:val["filename"])')
+  let mapped = filter(mapped, 'match(v:val, ".*' . word . '$") == 0')
+
+  return mapped
+
+endfunction
+
+function s:FileNameToPackage(filename)
+  let filename = a:filename
+  "TODO: Find out how to do an OR pattern
+  let filename = substitute(filename, "\.scala$", "", "")
+  let filename = substitute(filename, "\.java$", "", "")
+
+  let dir = filename
+  let dir = substitute(dir, "^.*\/src\/.*\/java\/", "", "")
+  let dir = substitute(dir, "^.*\/src\/.*\/scala\/", "", "")
+
+  "TODO: Slightly hacky hard-coded folder name
+  let dir = substitute(dir, "^.*\/target\/sbt-ctags-dep-srcs\/", "", "")
+
+  let dir = substitute(dir, "\/", ".", "g")
+  " let filename = substitute(filename, "^.*\/", "", "")
+  " let dir = "package " . filename
+
+  return dir
+
 endfunction
 
 command! -nargs=1 Function call s:Function(<f-args>)
