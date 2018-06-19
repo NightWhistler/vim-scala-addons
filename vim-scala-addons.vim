@@ -45,20 +45,18 @@ command! AddFastImport call s:AddFastImport()
 function! s:AddFastImport()
 
   execute "normal! mi"
+  let foundPackages = []
+
   if has_key(s:expansions, expand("<cword>"))
-    let full_import = s:expansions[expand("<cword>")]
+    let foundPackages = [s:expansions[expand("<cword>")]]
   elseif has_key(s:expansions, expand("<cWORD>"))
-    let full_import = s:expansions[expand("<cWORD>")]
+    let foundPackages = [s:expansions[expand("<cWORD>")]]
   else
-    let packages = s:FindPackage(expand("<cword>"))
-    if len(packages) == 1
-      let full_import = packages[0]
-    else 
-      let full_import = ""
-    endif
+    let foundPackages = s:FindPackage(expand("<cword>"))
   endif
 
-  if strlen( full_import ) > 0
+  if len(foundPackages) == 1 
+    let full_import = foundPackages[0]
     echom "Adding import for " . full_import
  " insert after last import, after package or on first line
     if search('^\s*import\s', 'b') > 0
@@ -69,8 +67,10 @@ function! s:AddFastImport()
       1
       execute "normal! Oimport " . full_import . "\<cr>\<esc>"
     endif
+  elseif len(foundPackages) > 1
+    echom "More than 1 match found for class '" . expand("<cword>") . "' can't add import."
   else
-    echom "Unknown class '" . expand("<cword>") . "' can't add import."
+    echom "No matches found for class '" . expand("<cword>") . "' can't add import."
   endif
 
   execute "normal! `i"
@@ -155,6 +155,10 @@ function! s:ShowPackages(word)
     echo "Match: " . item
   endfor
 
+  if len(matching) == 0
+    echo "No matches found for " . a:word
+  endif
+
 endfunction
 
 command FindPackage :call s:FindPackage(expand("<cword>"))
@@ -162,7 +166,7 @@ function! s:FindPackage(word)
 
   let word = a:word
   let tags = taglist('^' . word)
-  let tags = filter(tags, 'v:val["kind"] == "c"')
+  let tags = filter(tags, 'v:val["kind"] == "c" || v:val["kind"] == "i" || v:val["kind"] == "t"')
 
   let mapped = map(tags, 's:FileNameToPackage(v:val["filename"])')
   let mapped = filter(mapped, 'match(v:val, ".*' . word . '$") == 0')
