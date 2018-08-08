@@ -94,6 +94,20 @@ function! s:EmptyScalaClass()
   let result = append(4, "}")
 endfunction
 
+command OpenSpec :call s:OpenSpec()
+function! s:OpenSpec()
+  let filename = expand("%")
+
+  if filename =~# 'Spec\.scala$'
+    let filename = substitute(filename, "\Spec.scala$", "\.scala", "")
+    let filename = substitute(filename, "src/test/scala/", "src/main/scala/", "")
+  else
+    let filename = substitute(filename, "\.scala$", "Spec\.scala", "")
+    let filename = substitute(filename, "src/main/scala/", "src/test/scala/", "")
+  endif
+  execute "edit " . filename
+endfunction
+
 "Loads SBT errors into the Quickfix list. This assumes you are
 "running SBT with the -Dsbt.log.noformat=true flag.
 "
