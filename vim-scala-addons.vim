@@ -182,29 +182,35 @@ function! s:FindPackage(word)
   let tags = taglist('^' . word)
   let tags = filter(tags, 'v:val["kind"] == "c" || v:val["kind"] == "i" || v:val["kind"] == "t"')
 
-  let mapped = map(tags, 's:FileNameToPackage(v:val["filename"])')
-  let mapped = filter(mapped, 'match(v:val, ".*' . word . '$") == 0')
+  let mapped = map(tags, 's:ConstructClassName(v:val["filename"], word)')
 
-  return mapped
+  return uniq(sort(mapped))
 
 endfunction
 
-function s:FileNameToPackage(filename)
+function s:ConstructClassName(filename, className)
+  let packageName = g:FileNameToPackage(a:filename)
+  let fullName = packageName . "." . a:className
+  return fullName
+endfunction
+
+function g:FileNameToPackage(filename)
   let filename = a:filename
   "TODO: Find out how to do an OR pattern
   let filename = substitute(filename, "\.scala$", "", "")
   let filename = substitute(filename, "\.java$", "", "")
 
   let dir = filename
-  let dir = substitute(dir, "^.*\/src\/.*\/java\/", "", "")
-  let dir = substitute(dir, "^.*\/src\/.*\/scala\/", "", "")
+  let dir = substitute(dir, "^.*src\/.*\/java\/", "", "")
+  let dir = substitute(dir, "^.*src\/.*\/scala\/", "", "")
 
   "TODO: Slightly hacky hard-coded folder name
-  let dir = substitute(dir, "^.*\/target\/sbt-ctags-dep-srcs\/", "", "")
+  let dir = substitute(dir, "^.*target\/sbt-ctags-dep-srcs\/", "", "")
 
   let dir = substitute(dir, "\/", ".", "g")
-  " let filename = substitute(filename, "^.*\/", "", "")
-  " let dir = "package " . filename
+
+  "Strip off the class name / file name
+  let dir = substitute(dir, "\.[A-Za-z]*$", "", "")
 
   return dir
 
