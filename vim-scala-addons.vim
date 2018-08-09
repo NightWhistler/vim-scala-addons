@@ -189,6 +189,10 @@ function! s:FindPackage(word)
 
 endfunction
 
+"TODO: Instead of building the name from just the filename,
+"use the filename to find the package, and then append the
+"actual tag we were looking for. This will give much
+"better results
 function s:FileNameToPackage(filename)
   let filename = a:filename
   "TODO: Find out how to do an OR pattern
@@ -210,28 +214,28 @@ function s:FileNameToPackage(filename)
 
 endfunction
 
-command! -nargs=1 Function call s:Function(<f-args>)
-function! s:Function(name)
-  " Retrieve tags of the 'f' kind
-  let tags = taglist('^'.a:name)
-  let tags = filter(tags, 'v:val["kind"] == "f"')
+" command! -nargs=1 Function call s:Function(<f-args>)
+" function! s:Function(name)
+"   " Retrieve tags of the 'f' kind
+"   let tags = taglist('^'.a:name)
+"   let tags = filter(tags, 'v:val["kind"] == "f"')
 
-  " Prepare them for inserting in the quickfix window
-  let qf_taglist = []
-  for entry in tags
-    call add(qf_taglist, {
-          \ 'pattern':  entry['cmd'],
-          \ 'filename': entry['filename'],
-          \ })
-  endfor
+"   " Prepare them for inserting in the quickfix window
+"   let qf_taglist = []
+"   for entry in tags
+"     call add(qf_taglist, {
+"           \ 'pattern':  entry['cmd'],
+"           \ 'filename': entry['filename'],
+"           \ })
+"   endfor
 
-  " Place the tags in the quickfix window, if possible
-  if len(qf_taglist) > 0
-    call setqflist(qf_taglist)
-    copen
-  else
-    echo "No tags found for ".a:name
-  endif
-endfunction
+"   " Place the tags in the quickfix window, if possible
+"   if len(qf_taglist) > 0
+"     call setqflist(qf_taglist)
+"     copen
+"   else
+"     echo "No tags found for ".a:name
+"   endif
+" endfunction
 
 
