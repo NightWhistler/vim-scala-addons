@@ -180,12 +180,19 @@ function! s:FindPackage(word)
 
   let word = a:word
   let tags = taglist('^' . word)
-  let tags = filter(tags, 'v:val["kind"] == "c" || v:val["kind"] == "i" || v:val["kind"] == "t"')
+  let tags = filter(tags, 's:IsSupportedTag(v:val["kind"])')
 
   let mapped = map(tags, 's:ConstructClassName(v:val["filename"], word)')
 
   return uniq(sort(mapped))
+endfunction
 
+function s:IsSupportedTag(kind)
+  return a:kind == "c"  
+    || a:kind == "i"
+    || a:kind == "t"
+    || a:kind == "O"
+    || a:kind == "C"
 endfunction
 
 function s:ConstructClassName(filename, className)
