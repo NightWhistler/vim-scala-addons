@@ -125,7 +125,7 @@ function! s:LoadSBTErrors()
   "     \%-G%.%#
   set errorformat=
         \%E\ %#[error]\ %f:%l:%c:\ %m,
-        \%C\ %#[error]\ %p^,
+        \%C\ %#[error]\ %.%#,
         \%E[error]\ %f:%l%c:\ %m%#,
         \%W\ %#[warn]\ %f:%l:%c:\ %m,
         \%W[warn]\ %f:%l%c:\ %m%#,
