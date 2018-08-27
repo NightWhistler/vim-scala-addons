@@ -58,10 +58,8 @@ function! s:AddFastImport()
   if len(foundPackages) == 1 
     let full_import = foundPackages[0]
     echom "Adding import for " . full_import
- " insert after last import, after package or on first line
-    if search('^\s*import\s', 'b') > 0
-      execute "normal! jIimport " . full_import . "\<cr>\<esc>"
-    elseif search('^\s*package\s', 'b') > 0
+ " insert after package or on first line
+    if search('^\s*package\s', 'b') > 0
       execute "normal! joimport " . full_import . "\<cr>\<esc>"
     else
       1
@@ -122,16 +120,28 @@ function! s:LoadSBTErrors()
   "
   " SBT 1.0 Changed the errorformat, so the one in vim-scala no longer works.
   " We really need a nice dynamic way to switch.
-  set errorformat=%E\ %#[error]\ %f:%l:%c:\ %m,%C\ %#[error]\ %p^,%-C%.%#,%Z,
-      \%W\ %#[warn]\ %f:%l:%c:\ %m,%C\ %#[warn]\ %p^,%-C%.%#,%Z,
-      \%-G%.%#
+  " set errorformat=%E\ %#[error]\ %f:%l:%c:\ %m,%C\ %#[error]\ %p^,%-C%.%#,%Z,
+  "     \%W\ %#[warn]\ %f:%l:%c:\ %m,%C\ %#[warn]\ %p^,%-C%.%#,%Z,
+  "     \%-G%.%#
+  set errorformat=
+        \%E\ %#[error]\ %f:%l:%c:\ %m,
+        \%C\ %#[error]\ %p^,
+        \%E[error]\ %f:%l%c:\ %m%#,
+        \%W\ %#[warn]\ %f:%l:%c:\ %m,
+        \%W[warn]\ %f:%l%c:\ %m%#,
+        \%-G[info]%.%#,
+        \%-G[debug]%.%#,
+        \%-G[success]%.%#,
+        \%-G%.%#
 
   "Clear the Quickfix list
   cexpr []
   let foundItem = 0
 
   "Find all files named 'out'
-  let outFiles = systemlist("find . -name out")
+  " let outFiles = systemlist("find . -name out")
+  " This finds all files called 'out', sorted by most recently modified
+  let outFiles = systemlist("find . -name out -printf \"%T+\t%p\n\" | sort -r | cut -f 2")
 
   for item in outFiles
     "Filter on items with compileIncremental
@@ -191,7 +201,9 @@ function s:IsSupportedTag(kind)
   return a:kind == "c"  
     || a:kind == "i"
     || a:kind == "t"
+    || a:kind == "T"
     || a:kind == "O"
+    || a:kind == "o"
     || a:kind == "C"
 endfunction
 
